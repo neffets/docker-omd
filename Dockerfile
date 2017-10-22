@@ -1,32 +1,48 @@
 # Open Monitoring Distribution
 #
-# Forked from https://github.com/jwarlander/docker-omd
+# Forked from https://github.com/fstab/docker-omd
 #
-## Version: 0.1
-FROM ubuntu:12.04
-MAINTAINER Fabian Stäber, fabian@fstab.de
+## Version: 1.0
+FROM ubuntu:16.04
+MAINTAINER Steffen Schüssler, software@neffets.de
 
-# Make sure package repository is up to date
-RUN apt-get update
-RUN apt-get upgrade -y
+# Var for first config
+ENV DEBIAN_FRONTEND="noninteractive" \
+    SITENAME="monitor" \
+    OMD_APACHE_TCP_ADDR="0.0.0.0" \
+    OMD_TMPFS="off"
+
+RUN mkdir -p /opt/omd && ln -sf /opt/omd /omd
 
 # Install OMD, see http://labs.consol.de/OMD/
-RUN gpg --keyserver keys.gnupg.net --recv-keys F8C1CA08A57B9ED7
-RUN gpg --armor --export F8C1CA08A57B9ED7 | apt-key add -
-RUN echo "deb http://labs.consol.de/repo/stable/ubuntu precise main" >> /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get install -y libpython2.7 omd
+RUN gpg --keyserver keys.gnupg.net --recv-keys F8C1CA08A57B9ED7 \
+	&& gpg --armor --export F8C1CA08A57B9ED7 | apt-key add - \
+	&& echo "deb http://labs.consol.de/repo/stable/ubuntu xenial main" >> /etc/apt/sources.list
 
-# Set up a default site
-RUN omd create default
-# We don't want TMPFS as it requires higher privileges
-RUN omd config default set TMPFS off
-# Accept connections on any IP address, since we get a random one
-RUN omd config default set APACHE_TCP_ADDR 0.0.0.0
+# Make sure package repository is up to date
+RUN apt-get update \
+	&& apt-get upgrade -y \
+	&& apt-get install -y libpython2.7 \
+		python3-setuptools python3-setuptools-git python3-wheel python3-pip \
+		postfix mutt \
+		net-tools netcat wget
+
+RUN apt-get install -y omd \
+		check-mk-agent
+#RUN pip3 install check_docker \
+#	&& apt-get clean all
+
+# Fix some stuff in apache: no change ulimit and give the server a name
+RUN echo "APACHE_ULIMIT_MAX_FILES=true" >> /etc/apache2/envvars \
+	&& echo ServerName docker-omd > /etc/apache2/conf-available/docker-servername.conf \
+	&& a2enconf docker-servername
+
+VOLUME /opt/omd/sites
 
 # Add watchdog script
-ADD entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod a+rx /usr/local/bin/entrypoint.sh
 
 # Set up runtime options
 EXPOSE 5000
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["entrypoint.sh"]
