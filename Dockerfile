@@ -10,6 +10,7 @@ MAINTAINER Steffen Schüssler, software@neffets.de
 ENV DEBIAN_FRONTEND="noninteractive" \
     SITENAME="monitor" \
     OMD_APACHE_TCP_ADDR="0.0.0.0" \
+    OMD_APACHE_TCP_PORT="5000" \
     OMD_TMPFS="off"
 
 RUN mkdir -p /opt/omd && ln -sf /opt/omd /omd

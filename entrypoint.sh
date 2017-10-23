@@ -5,6 +5,10 @@ MAX_TRIES=5
 SITE=${SITENAME:=monitor}
 
 #######################################################################
+groupadd -g 1001 "${SITE}" || echo "* group $SITE already exists"
+useradd -s /bin/bash -m -d /opt/omd/sites/${SITE} -u 1001 -g "${SITE}" "${SITE}" || echo "* User $SITE already exists"
+# Fix some permission issues (not sure why it happens)
+[ -d "/opt/omd/sites/${SITE}" ] && chown -R ${SITE}.${SITE} "/opt/omd/sites/${SITE}"
 # Check if SITE is initialized
 omd sites -b | egrep -e "^${SITE}$"
 if [ "$?" -eq 1 ]; then
@@ -23,8 +27,13 @@ if [ "$?" -eq 1 ]; then
         fi
     done
 else
-    ln -sf /etc/alternatives/omd /opt/omd/sites/${SITE}/version
+    adduser "${SITE}" "${SITE}" || true
+    omd update --conflict install "${SITE}"
+    ln -sfn "../../versions/`omd versions -b|head -1`" /opt/omd/sites/${SITE}/version
 fi
+# Add the new user to crontab, to avoid error merging crontabs
+adduser "${SITE}" crontab || true
+omd enable "${SITE}"
 
 #######################################################################
 # watching for startup

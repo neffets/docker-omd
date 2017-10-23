@@ -1,0 +1,27 @@
+version: '3.2'
+
+services:
+  omd:
+    image: neffets/omd:2.60
+    networks:
+      - net
+      - bridge
+    environment:
+      SITENAME: "monitor"
+      OMD_APACHE_TCP_PORT: 5000
+      OMD_APACHE_TCP_ADDR: "0.0.0.0"
+      OMD_TMPFS: "off"
+      FORCE_SSL: 1
+      VIRTUAL_HOST: https://monitor.example.com, http://monitor.example.com
+      SERVICE_PORTS: 5000
+      VERSION: 2.60
+    volumes:
+      - /srv/docker/volumes/monitor:/opt/omd/sites
+
+networks:
+  net:
+    driver: overlay
+    internal: false
+  bridge:
+    driver: bridge
+    external: true
