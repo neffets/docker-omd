@@ -25,8 +25,8 @@ RUN apt-get update \
 	&& apt-get upgrade -y \
 	&& apt-get install -y libpython2.7 \
 		python3-setuptools python3-setuptools-git python3-wheel python3-pip \
-		postfix mutt \
-		net-tools netcat wget
+		net-tools netcat wget iputils-ping \
+		postfix mutt
 
 RUN apt-get install -y omd \
 		check-mk-agent

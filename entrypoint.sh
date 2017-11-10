@@ -33,6 +33,7 @@ else
 fi
 # Add the new user to crontab, to avoid error merging crontabs
 adduser "${SITE}" crontab || true
+adduser "${SITE}" omd || true
 omd enable "${SITE}"
 
 #######################################################################
