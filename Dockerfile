@@ -28,7 +28,8 @@ RUN apt-get update \
 		net-tools netcat wget iputils-ping \
 		postfix mutt
 
-RUN apt-get install -y omd-2.90-labs-edition \
+#RUN apt-get install -y omd-3.00-labs-edition \
+RUN apt-get install -y omd \
 		check-mk-agent
 #RUN pip3 install check_docker \
 #	&& apt-get clean all
