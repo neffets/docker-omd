@@ -2,7 +2,7 @@ version: '3.2'
 
 services:
   omd:
-    image: neffets/omd:2.70
+    image: neffets/omd:3.x
     networks:
       - net
       - bridge
@@ -13,15 +13,11 @@ services:
       OMD_TMPFS: "off"
       FORCE_SSL: 1
       VIRTUAL_HOST: https://monitor.example.com, http://monitor.example.com
-      SERVICE_PORTS: 5000
-      VERSION: 2.70
+      SERVICE_PORTS: "5000 ssl verify none"
+      VERSION: 3.10
     volumes:
       - /srv/docker/volumes/monitor:/opt/omd/sites
 
 networks:
   net:
     driver: overlay
-    internal: false
-  bridge:
-    driver: bridge
-    external: true
