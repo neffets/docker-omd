@@ -3,7 +3,7 @@
 # Forked from https://github.com/fstab/docker-omd
 #
 ## Version: 1.0
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 MAINTAINER Steffen Schüssler, software@neffets.de
 
 # Var for first config
@@ -16,9 +16,9 @@ ENV DEBIAN_FRONTEND="noninteractive" \
 RUN mkdir -p /opt/omd && ln -sf /opt/omd /omd
 
 # Install OMD, see http://labs.consol.de/OMD/
-RUN gpg --keyserver keys.gnupg.net --recv-keys F8C1CA08A57B9ED7 \
-	&& gpg --armor --export F8C1CA08A57B9ED7 | apt-key add - \
-	&& echo "deb http://labs.consol.de/repo/stable/ubuntu xenial main" >> /etc/apt/sources.list
+RUN apt-get update && apt-get install -y gpg sudo curl \
+    && curl -s "https://labs.consol.de/repo/stable/RPM-GPG-KEY" | sudo apt-key add - \
+	&& echo "deb http://labs.consol.de/repo/stable/ubuntu bionic main" >> /etc/apt/sources.list
 
 # Make sure package repository is up to date
 RUN apt-get update \
@@ -28,6 +28,7 @@ RUN apt-get update \
 		net-tools netcat wget iputils-ping \
 		postfix mutt
 
+#RUN apt-get install -y omd-3.00-labs-edition \
 RUN apt-get install -y omd \
 		check-mk-agent
 #RUN pip3 install check_docker \
