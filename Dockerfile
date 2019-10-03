@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND="noninteractive" \
     OMD_APACHE_TCP_ADDR="0.0.0.0" \
     OMD_APACHE_TCP_PORT="5000" \
     OMD_TMPFS="off" \
-    VERSION="1.0"
+    VERSION="3.10"
 
 RUN mkdir -p /opt/omd && ln -sf /opt/omd /omd
 
@@ -28,7 +28,7 @@ RUN apt-get update \
 		net-tools netcat wget iputils-ping \
 		postfix mutt
 
-#RUN apt-get install -y omd-3.00-labs-edition \
+#RUN apt-get install -y omd-3.10-labs-edition \
 RUN apt-get install -y omd \
 		check-mk-agent
 #RUN pip3 install check_docker \
