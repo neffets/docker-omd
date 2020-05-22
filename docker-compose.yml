@@ -14,7 +14,7 @@ services:
       FORCE_SSL: 1
       VIRTUAL_HOST: https://monitor.example.com, http://monitor.example.com
       SERVICE_PORTS: 5000
-      VERSION: 3.20
+      VERSION: 3.30
     volumes:
       - /srv/docker/volumes/monitor:/opt/omd/sites
 
