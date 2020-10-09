@@ -43,4 +43,4 @@ The Docker image can be built as follows:
     cd docker-omd
     docker build -t="neffets/omd" .
 
-Last changed: 2020-06-30
+Last changed: 2020-10-09

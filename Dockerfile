@@ -15,22 +15,25 @@ ENV DEBIAN_FRONTEND="noninteractive" \
 
 RUN mkdir -p /opt/omd && ln -sf /opt/omd /omd
 
-# Install OMD, see http://labs.consol.de/OMD/
-RUN apt-get update && apt-get install -y gpg sudo curl \
-    && curl -s "https://labs.consol.de/repo/stable/RPM-GPG-KEY" | sudo apt-key add - \
-	&& echo "deb http://labs.consol.de/repo/stable/ubuntu bionic main" >> /etc/apt/sources.list
-
 # Make sure package repository is up to date
+# ubuntu18.04 libpython2.7 / ubuntu20.04 libpython3.8 \
 RUN apt-get update \
 	&& apt-get upgrade -y \
 	&& apt-get install -y libpython2.7 \
 		python3-setuptools python3-setuptools-git python3-wheel python3-pip \
 		net-tools netcat wget iputils-ping \
-		postfix mutt
+		postfix mutt \
+        gpg sudo curl lsb-release \
+    && apt-get clean all
 
-#RUN apt-get install -y omd-3.30-labs-edition \
-RUN apt-get install -y omd \
-		check-mk-agent
+# Install OMD, see http://labs.consol.de/OMD/
+RUN curl -s "https://labs.consol.de/repo/stable/RPM-GPG-KEY" | sudo apt-key add - \
+	&& echo "deb http://labs.consol.de/repo/stable/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/labs-consol-stable.list \
+    && apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y omd \
+		check-mk-agent \
+    && apt-get clean all
 #RUN pip3 install check_docker \
 #	&& apt-get clean all
 
