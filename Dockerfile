@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND="noninteractive" \
     OMD_APACHE_TCP_ADDR="0.0.0.0" \
     OMD_APACHE_TCP_PORT="5000" \
     OMD_TMPFS="off" \
-    VERSION="3.30"
+    VERSION="4.00"
 
 RUN mkdir -p /opt/omd && ln -sf /opt/omd /omd
 
