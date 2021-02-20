@@ -32,7 +32,7 @@ RUN curl -s "https://labs.consol.de/repo/stable/RPM-GPG-KEY" | sudo apt-key add 
     && apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y omd \
-		check-mk-agent \
+		check-mk-agent libapache2-mod-python \
     && apt-get clean all
 #RUN pip3 install check_docker \
 #	&& apt-get clean all
