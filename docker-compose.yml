@@ -7,16 +7,18 @@ services:
       - net
       - bridge
     environment:
-      SITENAME: "monitor"
+      SITENAME: "sp"
       OMD_APACHE_TCP_PORT: 5000
       OMD_APACHE_TCP_ADDR: "0.0.0.0"
       OMD_TMPFS: "off"
       FORCE_SSL: 1
-      VIRTUAL_HOST: https://monitor.example.com, http://monitor.example.com
+      VIRTUAL_HOST: https://sp.example.com, http://sp.example.com
       SERVICE_PORTS: 5000
       VERSION: 4.40
     volumes:
-      - /srv/docker/volumes/monitor:/opt/omd/sites
+      - /srv/docker/volumes/monitor/sp/etc:/omd/sites/sp/etc
+      - /srv/docker/volumes/monitor/sp/local:/omd/sites/sp/local
+      - /srv/docker/volumes/monitor/sp/var:/omd/sites/sp/var
 
 networks:
   net:
