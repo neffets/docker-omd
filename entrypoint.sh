@@ -2,14 +2,14 @@
 
 SLEEP_TIME=60
 MAX_TRIES=5
-SITE=${SITENAME:=monitor}
+SITE=${SITENAME:=sp}
 
 #######################################################################
 groupadd -g 1001 "${SITE}" || echo "* group $SITE already exists"
-useradd -s /bin/bash -m -d /opt/omd/sites/${SITE} -u 1001 -g "${SITE}" "${SITE}" || echo "* User $SITE already exists"
+useradd -s /bin/bash -m -d /omd/sites/${SITE} -u 1001 -g "${SITE}" "${SITE}" || echo "* User $SITE already exists"
 # Fix some permission issues (not sure why it happens)
-[ -d "/opt/omd/sites/${SITE}" ] && chown -R ${SITE}.${SITE} "/opt/omd/sites/${SITE}"
-# Check if SITE is initialized
+[ -d "/omd/sites/${SITE}" ] && chown -R ${SITE}.${SITE} "/omd/sites/${SITE}"
+# Check if SITE is initialized ; else copy "sp"-site
 omd sites -b | egrep -e "^${SITE}$"
 if [ "$?" -eq 1 ]; then
 
@@ -35,6 +35,10 @@ fi
 adduser "${SITE}" crontab || true
 adduser "${SITE}" omd || true
 omd enable "${SITE}"
+if [ "${SITE}" != "sp" ]
+then
+    omd disable "sp"
+fi
 
 #######################################################################
 # watching for startup

@@ -1,29 +1,34 @@
 # Open Monitoring Distribution
 #
-# Forked from https://github.com/fstab/docker-omd
+# Forked from https://github.com/fstab/docker-omd and https://github.com/m-kraus/docker-omd
 #
 FROM ubuntu:18.04
 MAINTAINER Steffen Schüssler, software@neffets.de
 
 # Var for first config
 ENV DEBIAN_FRONTEND="noninteractive" \
-    SITENAME="monitor" \
+    SITENAME="sp" \
     OMD_APACHE_TCP_ADDR="0.0.0.0" \
     OMD_APACHE_TCP_PORT="5000" \
     OMD_TMPFS="off" \
     VERSION="4.00"
 
-RUN mkdir -p /opt/omd && ln -sf /opt/omd /omd
+RUN mkdir -p /omd/sites && ln -sf /omd /opt/omd
+
+RUN  echo 'net.ipv6.conf.default.disable_ipv6 = 1' > /etc/sysctl.d/20-ipv6-disable.conf; \
+echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> /etc/sysctl.d/20-ipv6-disable.conf; \
+echo 'net.ipv6.conf.lo.disable_ipv6 = 1' >> /etc/sysctl.d/20-ipv6-disable.conf; \
+cat /etc/sysctl.d/20-ipv6-disable.conf; sysctl -p
 
 # Make sure package repository is up to date
 # ubuntu18.04 libpython2.7 / ubuntu20.04 libpython3.8 \
 RUN apt-get update \
 	&& apt-get upgrade -y \
-	&& apt-get install -y libpython2.7 \
+	&& apt-get install -y libpython2.7 libapache2-mod-python \
 		python3-setuptools python3-setuptools-git python3-wheel python3-pip \
 		net-tools netcat wget iputils-ping \
 		postfix mutt \
-        gpg sudo curl lsb-release \
+        gnupg2 sudo curl lsb-release \
     && apt-get clean all
 
 # Install OMD, see http://labs.consol.de/OMD/
@@ -32,22 +37,32 @@ RUN curl -s "https://labs.consol.de/repo/stable/RPM-GPG-KEY" | sudo apt-key add 
     && apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y omd \
-		check-mk-agent libapache2-mod-python \
-    && apt-get clean all
+		check-mk-agent \
+    && apt-get clean all \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 #RUN pip3 install check_docker \
 #	&& apt-get clean all
 
 # Fix some stuff in apache: no change ulimit and give the server a name
 RUN echo "APACHE_ULIMIT_MAX_FILES=true" >> /etc/apache2/envvars \
 	&& echo ServerName docker-omd > /etc/apache2/conf-available/docker-servername.conf \
-	&& a2enconf docker-servername
+	&& a2enconf docker-servername \
+    && sed -i 's|echo "on"$|echo "off"|' /opt/omd/versions/default/lib/omd/hooks/TMPFS
 
-VOLUME /opt/omd/sites
+RUN omd create sp && \
+su - sp -c "ssh-keygen -b 2048 -t rsa -N '' -f /omd/sites/sp/.ssh/id_rsa" && \
+mv /omd/sites/sp/local /omd/sites/sp/local.docker && \
+mv /omd/sites/sp/etc /omd/sites/sp/etc.docker && \
+mv /omd/sites/sp/var /omd/sites/sp/var.docker
+
+VOLUME /omd/sites/sp/local
+VOLUME /omd/sites/sp/etc
+VOLUME /omd/sites/sp/var
 
 # Add watchdog script
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod a+rx /usr/local/bin/entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod a+rx /entrypoint.sh
 
 # Set up runtime options
 EXPOSE 5000
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
