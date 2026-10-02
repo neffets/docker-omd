@@ -2,7 +2,7 @@ version: '3.2'
 
 services:
   omd:
-    image: neffets/omd:4.x
+    image: neffets/omd:5.x
     networks:
       - net
       - bridge
@@ -14,7 +14,7 @@ services:
       FORCE_SSL: 1
       VIRTUAL_HOST: https://sp.example.com, http://sp.example.com
       SERVICE_PORTS: 5000
-      VERSION: 4.40
+      VERSION: 5.70
     volumes:
       - /srv/docker/volumes/monitor/sp/etc:/omd/sites/sp/etc
       - /srv/docker/volumes/monitor/sp/local:/omd/sites/sp/local

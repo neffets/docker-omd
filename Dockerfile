@@ -2,7 +2,7 @@
 #
 # Forked from https://github.com/fstab/docker-omd and https://github.com/m-kraus/docker-omd
 #
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 LABEL org.opencontainers.image.authors="software@neffets.de"
 
 # Var for first config
@@ -11,20 +11,20 @@ ENV DEBIAN_FRONTEND="noninteractive" \
     OMD_APACHE_TCP_ADDR="0.0.0.0" \
     OMD_APACHE_TCP_PORT="5000" \
     OMD_TMPFS="off" \
-    VERSION="5.50"
+    VERSION="5.70"
 
 RUN mkdir -p /omd/sites && ln -sf /omd /opt/omd
 
 RUN  echo 'net.ipv6.conf.default.disable_ipv6 = 1' > /etc/sysctl.d/20-ipv6-disable.conf; \
 echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> /etc/sysctl.d/20-ipv6-disable.conf; \
 echo 'net.ipv6.conf.lo.disable_ipv6 = 1' >> /etc/sysctl.d/20-ipv6-disable.conf; \
-cat /etc/sysctl.d/20-ipv6-disable.conf; sysctl -p
+cat /etc/sysctl.d/20-ipv6-disable.conf; sysctl --system
 
 # Make sure package repository is up to date
-# ubuntu18.04 libpython2.7 / ubuntu20.04 libpython3.8i / ununtu24.04 libpython3.12 \
+# ubuntu18.04 libpython2.7 / 20.04 libpython3.8 / 24.04 libpython3.12 / 26.04 libpython3.14
 RUN apt-get update -y \
 	&& apt-get upgrade -y \
-	&& apt-get install -y libpython3.12 libapache2-mod-python \
+	&& apt-get install -y libpython3.14 libapache2-mod-python \
 		python3-setuptools python3-setuptools-git python3-wheel python3-pip \
 		net-tools netcat-openbsd wget iputils-ping \
 		postfix mutt \
@@ -33,10 +33,8 @@ RUN apt-get update -y \
 
 # Install OMD, see http://labs.consol.de/OMD/
 RUN \
-    curl -s "https://labs.consol.de/repo/stable/RPM-GPG-KEY"  | sudo tee /etc/apt/trusted.gpg.d/labs.asc \
-    && curl -s "https://labs.consol.de/repo/stable/GPG-KEY-4096" | sudo tee /etc/apt/trusted.gpg.d/labs.asc \
-    && curl -s "https://labs.consol.de/repo/stable/GPG-KEY-4096" -o /etc/apt/auth.conf.d/labs.consol.de-GPG-KEY-4096 \
-    && echo "deb [signed-by=/etc/apt/auth.conf.d/labs.consol.de-GPG-KEY-4096] http://labs.consol.de/repo/stable/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/labs-consol-stable.list \
+    curl -fsS "https://labs.consol.de/repo/stable/monitoring-repo-consol-de-gpg-2026.asc" -o /etc/apt/trusted.gpg.d/monitoring-repo-consol-de-gpg-2026.asc \
+    && echo "deb [signed-by=/etc/apt/trusted.gpg.d/monitoring-repo-consol-de-gpg-2026.asc] http://labs.consol.de/repo/stable/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/labs-consol-stable.list \
     && apt-get update -y \
     && apt-get upgrade -y \
     && apt-get install -y omd \
